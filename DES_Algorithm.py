@@ -24,37 +24,48 @@ def Get_S_box(number): #This function takes the number of the S-box and returns 
       7 : s8
   }
   return(switcher.get(number))
-def Substitution(value , s_box): #This function takes a string of 6 bits and the desired s_box as inputs and returns a string of 4 bits after substitution
+
+#This function takes a string of 6 bits and the desired s_box as inputs and returns a string of 4 bits after substitution
+def Substitution(value , s_box): 
   row = int(value[0] + value[5] , 2)
   column = int(value[1]+value[2]+value[3]+ value[4] , 2)
   value = bin(s_box[row][column])[2:]
   while(len(value) < 4):
     value = '0' + value
   return value
+
+#Function to do the initial permutaion
 def Initial_permutation(message,InitualPermutationList):
    Initial_permutationText = ""
    for i in InitualPermutationList:
     for j in i:
       Initial_permutationText += message[j-1]
    return Initial_permutationText
+
+#Function to do the Key extension
 def Right_Key_Extension(Right_Value,Extension_List):
   funct_outcome=""
   for i in Extension_List:
     for j in i:
       funct_outcome += Right_Value[j-1]
   return funct_outcome
+
+#Second permutation
 def Secondary_Permutation(Value,P_Function_List):
     Second_Permutation=""
     for i in P_Function_List:
       for j in i:
         Second_Permutation += Value[j-1]
     return Second_Permutation
+
+#Final permutation
 def Final_Permutation(Value, Final_Permutation_List):
   Final_Permutation_Text=""
   for i in Final_Permutation_List:
     for j in i:
       Final_Permutation_Text+=Value[j-1]
   return Final_Permutation_Text
+
 #XOR function
 def XOR(String_1,String_2):
   res=""
@@ -64,6 +75,7 @@ def XOR(String_1,String_2):
     else:
       res+="0"
   return res
+
 def Encrypt(message , keys):
   #Every list in initial_permutation list of lists represents a row in the initial permutation table
   initial_permutation= [[58,50,42,34,26,18,10,2],[60,52,44,36,28,20,12,4],[62,54,46,38,30,22,14,6],[64,56,48,40,32,24,16,8],[57,49,41,33,25,17,9,1],[59,51,43,35,27,19,11,3],[61,53,54,37,29,21,13,5],[63,55,47,39,31,23,15,7]]
@@ -97,15 +109,24 @@ def Encrypt(message , keys):
     Shrinked_Right_Value=""
     # I subtracted 1 from the SBoX values in the method:Get_S_Box 
     while Sbox<8:
+      #Get the sbox from the function
       GetSbox= Get_S_box(Sbox)
+      
+      #Shrink the right half to 32 bits
       Shrinked_Right_Value+=Substitution(XOR_With_Key_List[Sbox] , GetSbox)
+      #Counter to loop on the S-Box
       Sbox+=1
+
     Rounds+=1
+    #To perform the Second permutation
     Second_Permutation= Secondary_Permutation(Shrinked_Right_Value,p_function)
     temp =Right
+    #Xor the left half with the result of the second permutation
     Right= XOR(Left,Second_Permutation)
     Left=temp
+  #Swap the left with the right
   Temp= Right+Left
+  #perform the final permutation
   Final_Outcome = Final_Permutation(Temp,final_permutation)
   return Final_Outcome
 
